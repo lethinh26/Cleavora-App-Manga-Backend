@@ -3,6 +3,7 @@ package com.clevora.clevora.service.auth;
 import com.clevora.clevora.dto.auth.LoginRequest;
 import com.clevora.clevora.dto.auth.LoginResponse;
 import com.clevora.clevora.dto.auth.RegisterRequest;
+import com.clevora.clevora.dto.user.ChangePassRequest;
 import com.clevora.clevora.entity.User;
 import com.clevora.clevora.exception.BadRequestException;
 import com.clevora.clevora.exception.ResourceNotFoundException;

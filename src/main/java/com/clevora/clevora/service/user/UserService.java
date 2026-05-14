@@ -2,7 +2,6 @@ package com.clevora.clevora.service.user;
 
 import com.clevora.clevora.dto.user.UserProfileRequest;
 import com.clevora.clevora.dto.user.ChangePassRequest;
-import com.clevora.clevora.dto.user.UpdateRequest;
 import com.clevora.clevora.dto.user.UserResponse;
 import com.clevora.clevora.entity.User;
 import com.clevora.clevora.exception.BadRequestException;

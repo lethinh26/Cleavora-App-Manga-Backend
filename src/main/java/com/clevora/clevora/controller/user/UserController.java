@@ -2,8 +2,11 @@ package com.clevora.clevora.controller.user;
 
 import com.clevora.clevora.dto.common.ApiResponse;
 import com.clevora.clevora.dto.user.UserProfileRequest;
+import com.clevora.clevora.dto.user.ChangePassRequest;
+import com.clevora.clevora.dto.user.UpdateRequest;
 import com.clevora.clevora.dto.user.UserResponse;
 import com.clevora.clevora.service.user.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -24,9 +27,16 @@ public class UserController {
     }
 
     @PutMapping("/profile")
-    public ResponseEntity<ApiResponse<UserResponse>> updateProfile(Authentication authentication,
-                                                                   @RequestBody UserProfileRequest request){
-        UserResponse profile = userService.updateProfile(authentication.getName(), request);
-        return ResponseEntity.ok(ApiResponse.success("Sửa thành công thông tin"));
+    public ResponseEntity<ApiResponse<UserResponse>> updateProfile(Authentication authentication, @Valid @RequestBody UpdateRequest request) {
+        String email = authentication.getName();
+        UserResponse profile = userService.updateProfile(email, request);
+        return ResponseEntity.ok(ApiResponse.success("Cập nhật thông tin thành công", profile));
+    }
+
+    @PutMapping("/password")
+    public ResponseEntity<ApiResponse<Void>> changePassword(Authentication authentication, @Valid @RequestBody ChangePassRequest request) {
+        String email = authentication.getName();
+        userService.changePassword(email, request);
+        return ResponseEntity.ok(ApiResponse.success("Đổi mật khẩu thành công"));
     }
 }

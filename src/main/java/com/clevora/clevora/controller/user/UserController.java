@@ -1,6 +1,7 @@
 package com.clevora.clevora.controller.user;
 
 import com.clevora.clevora.dto.common.ApiResponse;
+import com.clevora.clevora.dto.user.UserProfileRequest;
 import com.clevora.clevora.dto.user.ChangePassRequest;
 import com.clevora.clevora.dto.user.UpdateRequest;
 import com.clevora.clevora.dto.user.UserResponse;

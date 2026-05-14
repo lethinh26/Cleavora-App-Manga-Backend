@@ -1,5 +1,6 @@
 package com.clevora.clevora.service.user;
 
+import com.clevora.clevora.dto.user.UserProfileRequest;
 import com.clevora.clevora.dto.user.ChangePassRequest;
 import com.clevora.clevora.dto.user.UpdateRequest;
 import com.clevora.clevora.dto.user.UserResponse;
@@ -10,6 +11,9 @@ import com.clevora.clevora.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
 
 
 @Service
@@ -33,13 +37,14 @@ public class UserService {
                 .build();
     }
 
-    public UserResponse updateProfile(String email, UpdateRequest request) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy user"));
-
-        user.setDisplayName(request.getDisplayName());
-        user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
-
+    @Transactional
+    public UserResponse updateProfile(String email, UserProfileRequest request){
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy user"));
+        if(request.getDisplayName() != null && !request.getDisplayName().isEmpty())
+            user.setDisplayName(request.getDisplayName());
+        if(request.getAvatarUrl() != null && !request.getAvatarUrl().isEmpty())
+            user.setAvatarUrl(request.getAvatarUrl());
+        user.setUpdatedAt(LocalDateTime.now());
         userRepository.save(user);
         return UserResponse.builder()
                 .id(user.getId())

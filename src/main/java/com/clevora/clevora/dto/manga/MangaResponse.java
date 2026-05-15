@@ -50,7 +50,7 @@ public class MangaResponse {
     // BUILDER FROM ENTITY
     // =====================================
 
-    public static MangaResponse fromEntity(Manga manga) {
+    public static MangaResponse fromEntityManga(Manga manga) {
 
         return MangaResponse.builder()
                 .id(manga.getId())

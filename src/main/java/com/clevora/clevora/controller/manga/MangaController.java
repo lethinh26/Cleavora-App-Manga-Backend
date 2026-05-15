@@ -3,13 +3,19 @@ package com.clevora.clevora.controller.manga;
 import com.clevora.clevora.dto.common.ApiResponse;
 import com.clevora.clevora.dto.manga.MangaRequest;
 import com.clevora.clevora.dto.manga.MangaResponse;
+import com.clevora.clevora.dto.manga.SearchMangaRequest;
+import com.clevora.clevora.entity.Manga;
 import com.clevora.clevora.service.manga.MangaService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Controller
 @AllArgsConstructor
@@ -37,6 +43,68 @@ public class MangaController {
                                                            @PathVariable int id){
         mangaService.deleteManga(authentication.getName(), id);
         return ResponseEntity.ok(ApiResponse.success("Xóa mẫu truyện thành công"));
+    }
+
+//    8: v1/mangas: Danh sách truyện đã duyệt (APPROVED). Hỗ trợ phân trang, sắp xếp (mới nhất, lượt xem, like, follow), lọc theo trạng thái.
+    @GetMapping("/mangas")
+    public ResponseEntity<ApiResponse<List<MangaResponse>>> getMangas(@RequestParam(defaultValue = "0") int page,
+                                                                      @RequestParam(defaultValue = "20") int size,
+                                                                      @RequestParam(defaultValue = "newest") String sortBy,
+                                                                      @RequestParam(required = false) String status){
+        List<MangaResponse> mangaResponses = mangaService.getApprovedMangas(page, size, sortBy, status);
+        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách truyện thành công", mangaResponses));
+    }
+//    9: /v1/mangas/{slug}: Chi tiết truyện theo slug. Trả về thông tin truyện, danh sách thể loại, thống kê (view, like, follow).
+    @GetMapping("/mangas/{slug}")
+    public ResponseEntity<ApiResponse<MangaResponse>> getMangaDetail(@PathVariable String slug) {
+        MangaResponse response = mangaService.getMangaDetailBySlug(slug);
+        return ResponseEntity.ok(ApiResponse.success("Lấy truyện thành công",response));
+    }
+//    11: /v1/mangas/search: Tìm kiếm truyện theo keyword (title, author_name). Chỉ trả về truyện APPROVED. Hỗ trợ phân trang.
+    @GetMapping("mangas/search")
+    public ResponseEntity<Page<MangaResponse>> searchMangas(
+            @RequestParam String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+
+        Page<MangaResponse> response = mangaService.searchMangas(keyword, page, size);
+        return ResponseEntity.ok(response);
+    }
+
+    // 28 post: /v1/mangas/submit: User submit truyện mới.
+    // Nhận title, author_name, description, cover_image, genres.
+    // Tạo manga với approval_status = PENDING, submitted_by = user hiện tại.
+    @PostMapping("/mangas/submit")
+    public ResponseEntity<ApiResponse<MangaResponse>> submitManga(
+            Authentication authentication,
+            @Valid @RequestBody MangaRequest request) {
+
+        String currentUserEmail = authentication.getName();
+        MangaResponse response = mangaService.submitManga(request, currentUserEmail);
+        return ResponseEntity.ok(ApiResponse.success("Submit thành công mẫu truyễn", response));
+    }
+
+    // 29: /v1/me/mangas: Danh sách truyện user đã đăng. Hỗ trợ lọc theo approval_status (PENDING/APPROVED/REJECTED). Hiển thị reject_reason nếu bị từ chối.
+    @GetMapping("/mangas/me")
+    public ResponseEntity<ApiResponse<Page<MangaResponse>>> getMyMangas(
+            @RequestParam(required = false, name = "approval_status") String approvalStatus,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            Authentication authentication) {
+
+        Page<MangaResponse> response = mangaService.getMyMangas(authentication.getName(), approvalStatus, page, size);
+        return ResponseEntity.ok(ApiResponse.success("Lấy ra danh sach manga của tôi thành công",response));
+    }
+
+    // 30 put: /v1/me/mangas/{id}: User chỉnh sửa truyện đã đăng (chỉ khi PENDING hoặc REJECTED). Cho phép sửa title, description, cover, genres rồi re-submit.
+    @PutMapping("/mangas/{id}")
+    public ResponseEntity<MangaResponse> updateMyManga(
+            @PathVariable int id,
+            @Valid @RequestBody MangaRequest request,
+            Authentication authentication) {
+
+        MangaResponse response = mangaService.updateMyManga(id, request, authentication.getName());
+        return ResponseEntity.ok(response);
     }
 
 }

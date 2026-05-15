@@ -3,6 +3,7 @@ package com.clevora.clevora.service.manga;
 import com.clevora.clevora.dto.manga.GenreRequest;
 import com.clevora.clevora.entity.Genre;
 import com.clevora.clevora.entity.User;
+import com.clevora.clevora.exception.ForbiddenException;
 import com.clevora.clevora.exception.ResourceNotFoundException;
 import com.clevora.clevora.repository.GenreRepository;
 import com.clevora.clevora.repository.UserRepository;
@@ -67,7 +68,7 @@ public class GenreService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("Người dùng không tồn tại"));
         if (user.getRole() != User.Role.ADMIN && user.getRole() != User.Role.SUPERADMIN) {
-            throw new RuntimeException("Bạn không có quyền thực hiện hành động này");
+            throw new ForbiddenException("Bạn không có quyền thực hiện hành động này");
         }
     }
 }

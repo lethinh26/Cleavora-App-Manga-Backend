@@ -3,8 +3,6 @@ package com.clevora.clevora.controller.manga;
 import com.clevora.clevora.dto.common.ApiResponse;
 import com.clevora.clevora.dto.manga.MangaRequest;
 import com.clevora.clevora.dto.manga.MangaResponse;
-import com.clevora.clevora.dto.manga.SearchMangaRequest;
-import com.clevora.clevora.entity.Manga;
 import com.clevora.clevora.service.manga.MangaService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;

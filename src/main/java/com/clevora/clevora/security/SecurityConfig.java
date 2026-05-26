@@ -54,6 +54,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // PUBLIC
                         .requestMatchers("/v1/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/v1/mangas/*/like").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/v1/mangas/*/like-status").authenticated()
                         .requestMatchers(HttpMethod.GET, "/v1/mangas/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/v1/chapters/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/v1/chapters/*/view").permitAll()

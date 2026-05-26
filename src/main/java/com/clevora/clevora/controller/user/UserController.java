@@ -38,4 +38,19 @@ public class UserController {
         userService.changePassword(email, request);
         return ResponseEntity.ok(ApiResponse.success("Đổi mật khẩu thành công"));
     }
+    
+    @PutMapping("/history") // 23
+    public ResponseEntity<ApiResponse<Void>> updateLocationHistory(Authentication authentication) {
+        // Lưu/cập nhật vị trí đọc (UPSERT). Nhận manga_id, chapter_id, last_page. Tự động cập nhật last_read_at.
+
+        return ResponseEntity.ok(ApiResponse.success("Cập nhập thành công"));
+    }
+
+    @GetMapping("/history/{mangaId}") // 27
+    public ResponseEntity<ApiResponse<Void>> getHistoryManga(Authentication authentication, @PathVariable String mangaId) {
+        // Lấy vị trí đọc gần nhất của 1 truyện. Dùng cho nút "Tiếp tục đọc". Trả về chapter_id + last_page.
+
+        return ResponseEntity.ok(ApiResponse.success("Lấy dữ liệu thành công"));
+    }
+
 }

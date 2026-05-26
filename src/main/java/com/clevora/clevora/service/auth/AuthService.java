@@ -34,7 +34,7 @@ public class AuthService {
                 .displayName(request.getDisplayName())
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
                 .role(User.Role.USER)
-                .isActive(true)
+                .active(true)
                 .build();
 
         return userRepository.save(user);

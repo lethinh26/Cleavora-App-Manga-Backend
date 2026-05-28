@@ -85,8 +85,8 @@ public class Manga {
     )
     private Set<Genre> genres = new HashSet<>();
 
-//    @OneToMany(mappedBy = "manga", cascade = CascadeType.ALL, orphanRemoval = true)
-//    private Set<Chapter> chapters = new HashSet<>();
+    @OneToMany(mappedBy = "manga", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Chapter> chapters = new HashSet<>();
 
     @PrePersist
     public void prePersist() {

@@ -80,7 +80,7 @@ public class FollowService {
 
         return FollowListResponse.builder()
                 .content(page.getContent().stream()
-                        .map(MangaResponse::fromEntity)
+                        .map(MangaResponse::fromEntityManga)
                         .toList())
                 .page(page.getNumber())
                 .size(page.getSize())

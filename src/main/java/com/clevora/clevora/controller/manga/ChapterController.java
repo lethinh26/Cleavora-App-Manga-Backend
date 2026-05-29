@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/v1")
 @RequiredArgsConstructor
 public class ChapterController {
 
@@ -36,7 +36,7 @@ public class ChapterController {
         return ResponseEntity.ok(ApiResponse.success("Lấy chi tiết chapter thành công", chapter));
     }
 
-    @PostMapping("/mangas/{mangaId}/chapters")
+    @PostMapping("/admin/mangas/{mangaId}/chapters")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPERADMIN', 'USER')")
     public ResponseEntity<ApiResponse<ChapterResponse>> createChapter(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -46,7 +46,7 @@ public class ChapterController {
         return ResponseEntity.ok(ApiResponse.success("Thêm chapter thành công", response));
     }
 
-    @PutMapping("/chapters/{chapterId}")
+    @PutMapping("/admin/chapters/{chapterId}")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPERADMIN', 'USER')")
     public ResponseEntity<ApiResponse<ChapterResponse>> updateChapter(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -56,7 +56,7 @@ public class ChapterController {
         return ResponseEntity.ok(ApiResponse.success("Cập nhật chapter thành công", response));
     }
 
-    @DeleteMapping("/chapters/{chapterId}")
+    @DeleteMapping("/admin/chapters/{chapterId}")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPERADMIN', 'USER')")
     public ResponseEntity<ApiResponse<String>> deleteChapter(
             @AuthenticationPrincipal UserDetails userDetails,

@@ -12,7 +12,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -27,7 +26,7 @@ public class MangaController {
         return ResponseEntity.ok(ApiResponse.success("Tạo mới truyện thành công", mangaResponse));
     }
 
-    @PutMapping("/admin/manga/{id}")
+    @PutMapping("/admin/mangas/{id}")
     public ResponseEntity<ApiResponse<MangaResponse>> updateManga(Authentication authentication,
                                                                   @Valid @RequestBody MangaRequest mangaRequest,
                                                                   @PathVariable int id){
@@ -35,9 +34,8 @@ public class MangaController {
         return ResponseEntity.ok(ApiResponse.success("Sửa mẫu truyện thành công", mangaResponse));
     }
 
-    @DeleteMapping("/admin/manga/{id}")
+    @DeleteMapping("/admin/mangas/{id}")
     public ResponseEntity<ApiResponse<Object>> deleteManga(Authentication authentication,
-                                                           @Valid @RequestBody MangaRequest mangaRequest,
                                                            @PathVariable int id){
         mangaService.deleteManga(authentication.getName(), id);
         return ResponseEntity.ok(ApiResponse.success("Xóa mẫu truyện thành công"));
@@ -83,7 +81,7 @@ public class MangaController {
     }
 
     // 29: /v1/me/mangas: Danh sách truyện user đã đăng. Hỗ trợ lọc theo approval_status (PENDING/APPROVED/REJECTED). Hiển thị reject_reason nếu bị từ chối.
-    @GetMapping("/mangas/me")
+    @GetMapping("/me/mangas")
     public ResponseEntity<ApiResponse<Page<MangaResponse>>> getMyMangas(
             @RequestParam(required = false, name = "approval_status") String approvalStatus,
             @RequestParam(defaultValue = "0") int page,
@@ -95,14 +93,14 @@ public class MangaController {
     }
 
     // 30 put: /v1/me/mangas/{id}: User chỉnh sửa truyện đã đăng (chỉ khi PENDING hoặc REJECTED). Cho phép sửa title, description, cover, genres rồi re-submit.
-    @PutMapping("/mangas/{id}")
-    public ResponseEntity<MangaResponse> updateMyManga(
+    @PutMapping("/me/mangas/{id}")
+    public ResponseEntity<ApiResponse<MangaResponse>> updateMyManga(
             @PathVariable int id,
             @Valid @RequestBody MangaRequest request,
             Authentication authentication) {
 
         MangaResponse response = mangaService.updateMyManga(id, request, authentication.getName());
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ApiResponse.success("Cập nhật truyện thành công", response));
     }
 
 }

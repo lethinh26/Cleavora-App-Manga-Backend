@@ -30,14 +30,11 @@ public class Chapter {
     @Column(name = "chapter_number", nullable = false)
     private Double chapterNumber;
 
-    @Column(name = "view_count", nullable = false)
-    private Integer viewCount = 0;
+    @Column(name = "page_count", nullable = false)
+    private Integer pageCount = 0;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
-
-    @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "chapter", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ChapterImage> images = new ArrayList<>();
@@ -45,11 +42,5 @@ public class Chapter {
     @PrePersist
     public void prePersist() {
         this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    public void preUpdate() {
-        this.updatedAt = LocalDateTime.now();
     }
 }

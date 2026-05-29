@@ -57,9 +57,9 @@ public class ChapterService {
                 .id(chapter.getId())
                 .title(chapter.getTitle())
                 .chapterNumber(chapter.getChapterNumber())
-                .viewCount(chapter.getViewCount())
+                .viewCount(chapter.getPageCount())
                 .createdAt(chapter.getCreatedAt())
-                .updatedAt(chapter.getUpdatedAt())
+                .updatedAt(chapter.getCreatedAt())
                 .images(images)
                 .build();
     }
@@ -72,12 +72,11 @@ public class ChapterService {
                 .manga(manga)
                 .title(request.getTitle())
                 .chapterNumber(request.getChapterNumber())
-                .viewCount(0)
+                .pageCount(request.getImageUrls() != null ? request.getImageUrls().size() : 0)
                 .build();
-        
+
         Chapter savedChapter = chapterRepository.save(chapter);
 
-        // Save images if any
         if (request.getImageUrls() != null && !request.getImageUrls().isEmpty()) {
             int pageNumber = 1;
             for (String url : request.getImageUrls()) {
@@ -97,20 +96,18 @@ public class ChapterService {
     public ChapterResponse updateChapter(String email, Integer chapterId, ChapterRequest request) {
         Chapter chapter = chapterRepository.findById(chapterId)
                 .orElseThrow(() -> new ResourceNotFoundException("Chapter không tồn tại!"));
-        
+
         validateAndGetMangaForEdit(email, chapter.getManga().getId());
 
         chapter.setTitle(request.getTitle());
         chapter.setChapterNumber(request.getChapterNumber());
+        chapter.setPageCount(request.getImageUrls() != null ? request.getImageUrls().size() : chapter.getPageCount());
         Chapter updatedChapter = chapterRepository.save(chapter);
 
-        // Re-save images
         if (request.getImageUrls() != null) {
-            // Delete old images
             List<ChapterImage> oldImages = chapterImageRepository.findByChapterIdOrderByPageNumberAsc(chapterId);
             chapterImageRepository.deleteAll(oldImages);
 
-            // Save new images
             int pageNumber = 1;
             for (String url : request.getImageUrls()) {
                 ChapterImage image = ChapterImage.builder()
@@ -129,9 +126,9 @@ public class ChapterService {
     public void deleteChapter(String email, Integer chapterId) {
         Chapter chapter = chapterRepository.findById(chapterId)
                 .orElseThrow(() -> new ResourceNotFoundException("Chapter không tồn tại!"));
-        
+
         validateAndGetMangaForEdit(email, chapter.getManga().getId());
-        
+
         chapterRepository.delete(chapter);
     }
 
@@ -139,9 +136,6 @@ public class ChapterService {
     public void incrementViewCount(Integer chapterId) {
         Chapter chapter = chapterRepository.findById(chapterId)
                 .orElseThrow(() -> new ResourceNotFoundException("Chapter không tồn tại!"));
-        
-        chapter.setViewCount(chapter.getViewCount() + 1);
-        chapterRepository.save(chapter);
 
         Manga manga = chapter.getManga();
         manga.setViewCount(manga.getViewCount() + 1);
@@ -151,7 +145,7 @@ public class ChapterService {
     private Manga validateAndGetMangaForEdit(String email, Integer mangaId) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("Người dùng không tồn tại"));
-        
+
         Manga manga = mangaRepository.findById(mangaId)
                 .orElseThrow(() -> new ResourceNotFoundException("Truyện không tồn tại!"));
 
@@ -170,9 +164,9 @@ public class ChapterService {
                 .id(chapter.getId())
                 .title(chapter.getTitle())
                 .chapterNumber(chapter.getChapterNumber())
-                .viewCount(chapter.getViewCount())
+                .viewCount(chapter.getPageCount())
                 .createdAt(chapter.getCreatedAt())
-                .updatedAt(chapter.getUpdatedAt())
+                .updatedAt(chapter.getCreatedAt())
                 .build();
     }
 }

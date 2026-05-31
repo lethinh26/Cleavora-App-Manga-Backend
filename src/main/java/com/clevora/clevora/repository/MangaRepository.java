@@ -48,4 +48,8 @@ public interface MangaRepository extends JpaRepository<Manga, Integer> {
             @Param("approvalStatus") Manga.ApprovalStatus approvalStatus,
             Pageable pageable
     );
+
+    Page<Manga> findByApprovalStatus(Manga.ApprovalStatus approvalStatus, Pageable pageable);
+
+    long countByApprovalStatus(Manga.ApprovalStatus approvalStatus);
 }

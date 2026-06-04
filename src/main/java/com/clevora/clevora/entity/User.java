@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * Entity mẫu - Bảng users.
@@ -70,4 +71,7 @@ public class User {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<ReadingHistory> readingHistories;
 }

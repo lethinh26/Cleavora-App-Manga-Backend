@@ -6,6 +6,7 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -106,5 +107,8 @@ public class Manga {
     public enum ApprovalStatus{
         PENDING, APPROVED, REJECTED
     }
+
+    @OneToMany(mappedBy = "manga", cascade = CascadeType.ALL)
+    private List<ReadingHistory> readingHistories;
 }
 

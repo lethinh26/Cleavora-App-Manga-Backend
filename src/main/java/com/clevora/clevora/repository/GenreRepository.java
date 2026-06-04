@@ -14,5 +14,5 @@ public interface GenreRepository extends JpaRepository<Genre, Integer> {
 
     boolean existsGenreBySlug(String slug);
 
-    void removeGenreById(Integer id);
+    void deleteById(Integer id);
 }

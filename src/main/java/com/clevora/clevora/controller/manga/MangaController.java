@@ -9,12 +9,12 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Controller
+@RestController
 @AllArgsConstructor
 @RequestMapping("/v1")
 public class MangaController {
@@ -32,6 +32,12 @@ public class MangaController {
                                                                   @PathVariable int id){
         MangaResponse mangaResponse = mangaService.updateManga(authentication.getName(), id ,mangaRequest);
         return ResponseEntity.ok(ApiResponse.success("Sửa mẫu truyện thành công", mangaResponse));
+    }
+
+    @GetMapping("/admin/mangas/{id}")
+    public ResponseEntity<ApiResponse<MangaResponse>> getMangaById(@PathVariable int id){
+        MangaResponse response = mangaService.getMangaById(id);
+        return ResponseEntity.ok(ApiResponse.success("Lấy truyện thành công", response));
     }
 
     @DeleteMapping("/admin/mangas/{id}")
@@ -57,7 +63,7 @@ public class MangaController {
         return ResponseEntity.ok(ApiResponse.success("Lấy truyện thành công",response));
     }
 //    11: /v1/mangas/search: Tìm kiếm truyện theo keyword (title, author_name). Chỉ trả về truyện APPROVED. Hỗ trợ phân trang.
-    @GetMapping("mangas/search")
+    @GetMapping("/mangas/search")
     public ResponseEntity<Page<MangaResponse>> searchMangas(
             @RequestParam String keyword,
             @RequestParam(defaultValue = "0") int page,
@@ -90,6 +96,16 @@ public class MangaController {
 
         Page<MangaResponse> response = mangaService.getMyMangas(authentication.getName(), approvalStatus, page, size);
         return ResponseEntity.ok(ApiResponse.success("Lấy ra danh sach manga của tôi thành công",response));
+    }
+
+    // Admin: danh sách tất cả truyện (optional filter by approval_status)
+    @GetMapping("/admin/mangas")
+    public ResponseEntity<ApiResponse<Page<MangaResponse>>> getAdminMangas(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false, name = "approval_status") String approvalStatus) {
+        Page<MangaResponse> response = mangaService.getAdminMangas(page, size, approvalStatus);
+        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách truyện thành công", response));
     }
 
     // 30 put: /v1/me/mangas/{id}: User chỉnh sửa truyện đã đăng (chỉ khi PENDING hoặc REJECTED). Cho phép sửa title, description, cover, genres rồi re-submit.

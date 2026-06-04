@@ -8,7 +8,6 @@ import com.clevora.clevora.service.manga.ChapterService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -37,7 +36,6 @@ public class ChapterController {
     }
 
     @PostMapping("/admin/mangas/{mangaId}/chapters")
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPERADMIN', 'USER')")
     public ResponseEntity<ApiResponse<ChapterResponse>> createChapter(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable Integer mangaId,
@@ -47,7 +45,6 @@ public class ChapterController {
     }
 
     @PutMapping("/admin/chapters/{chapterId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPERADMIN', 'USER')")
     public ResponseEntity<ApiResponse<ChapterResponse>> updateChapter(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable Integer chapterId,
@@ -57,7 +54,6 @@ public class ChapterController {
     }
 
     @DeleteMapping("/admin/chapters/{chapterId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPERADMIN', 'USER')")
     public ResponseEntity<ApiResponse<String>> deleteChapter(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable Integer chapterId) {

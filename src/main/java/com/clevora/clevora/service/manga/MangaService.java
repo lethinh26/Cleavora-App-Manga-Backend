@@ -44,7 +44,7 @@ public class MangaService {
                 .coverImageUrl(mangaRequest.getCoverImageUrl())
                 .authorName(mangaRequest.getAuthorName())
                 .artistName(mangaRequest.getArtistName())
-                .status(Manga.MangaStatus.ONGOING)
+                .status(mangaRequest.getStatus() != null ? mangaRequest.getStatus() : Manga.MangaStatus.ONGOING)
                 .approvalStatus(Manga.ApprovalStatus.APPROVED)
                 .genres(genres)
                 .viewCount(0)
@@ -70,17 +70,32 @@ public class MangaService {
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Manga không tồn tại"));
 
-        Set<Genre> genres = getGenresFromIds(mangaRequest.getGenreIds());
-
-        manga.setTitle(mangaRequest.getTitle());
-        manga.setSlug(mangaRequest.getSlug());
-        manga.setDescription(mangaRequest.getDescription());
-        manga.setCoverImageUrl(mangaRequest.getCoverImageUrl());
-        manga.setAuthorName(mangaRequest.getAuthorName());
-        manga.setArtistName(mangaRequest.getArtistName());
-        manga.setStatus(mangaRequest.getStatus());
-        manga.setApprovalStatus(mangaRequest.getApprovalStatus());
-        manga.setGenres(genres);
+        // Only update fields that are provided
+        if (mangaRequest.getTitle() != null && !mangaRequest.getTitle().isBlank()) {
+            manga.setTitle(mangaRequest.getTitle());
+        }
+        if (mangaRequest.getSlug() != null && !mangaRequest.getSlug().isBlank()) {
+            manga.setSlug(mangaRequest.getSlug());
+        }
+        if (mangaRequest.getDescription() != null) {
+            manga.setDescription(mangaRequest.getDescription());
+        }
+        if (mangaRequest.getCoverImageUrl() != null) {
+            manga.setCoverImageUrl(mangaRequest.getCoverImageUrl());
+        }
+        if (mangaRequest.getAuthorName() != null) {
+            manga.setAuthorName(mangaRequest.getAuthorName());
+        }
+        if (mangaRequest.getArtistName() != null) {
+            manga.setArtistName(mangaRequest.getArtistName());
+        }
+        if (mangaRequest.getStatus() != null) {
+            manga.setStatus(mangaRequest.getStatus());
+        }
+        if (mangaRequest.getGenreIds() != null && !mangaRequest.getGenreIds().isEmpty()) {
+            Set<Genre> genres = getGenresFromIds(mangaRequest.getGenreIds());
+            manga.setGenres(genres);
+        }
 
         Manga updatedManga = mangaRepository.save(manga);
 
@@ -143,6 +158,15 @@ public class MangaService {
         return MangaResponse.fromEntityManga(manga);
     }
 
+    /**
+     * Admin get manga by ID (all statuses)
+     */
+    public MangaResponse getMangaById(Integer id) {
+        Manga manga = mangaRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy truyện!"));
+        return MangaResponse.fromEntityManga(manga);
+    }
+
     public Page<MangaResponse> searchMangas(String keyword, int page, int size) {
         if (keyword == null || keyword.trim().isEmpty()) {
             return Page.empty();
@@ -200,6 +224,25 @@ public class MangaService {
             }
         }
         Page<Manga> mangaPage = mangaRepository.findMyMangas(userEmail, statusEnum, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt")));
+        return mangaPage.map(MangaResponse::fromEntityManga);
+    }
+
+    /**
+     * Admin: danh sách tất cả truyện (optional filter by approval_status)
+     */
+    public Page<MangaResponse> getAdminMangas(int page, int size, String approvalStatusStr) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<Manga> mangaPage;
+        if (approvalStatusStr != null && !approvalStatusStr.trim().isEmpty()) {
+            try {
+                Manga.ApprovalStatus status = Manga.ApprovalStatus.valueOf(approvalStatusStr.toUpperCase());
+                mangaPage = mangaRepository.findByApprovalStatus(status, pageable);
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Trạng thái phê duyệt không hợp lệ: " + approvalStatusStr);
+            }
+        } else {
+            mangaPage = mangaRepository.findAll(pageable);
+        }
         return mangaPage.map(MangaResponse::fromEntityManga);
     }
 

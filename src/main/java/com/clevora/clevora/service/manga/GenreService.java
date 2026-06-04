@@ -35,11 +35,11 @@ public class GenreService {
         Genre existingGenre = genreRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy thể loại với ID"));
 
-        // check ton tai
-        if(genreRepository.existsGenreByName(genreRequest.getName())){
+        // check ton tai (loại trừ chính nó)
+        if(!existingGenre.getName().equals(genreRequest.getName()) && genreRepository.existsGenreByName(genreRequest.getName())){
             throw new ResourceNotFoundException("Không cho phép trùng lặp tên thể loại");
         }
-        if(genreRepository.existsGenreBySlug(genreRequest.getSlug())){
+        if(!existingGenre.getSlug().equals(genreRequest.getSlug()) && genreRepository.existsGenreBySlug(genreRequest.getSlug())){
             throw new ResourceNotFoundException("Không cho phép trùng lặp tên Slug");
         }
 
@@ -56,7 +56,7 @@ public class GenreService {
 //            throw new ResourceNotFoundException("Không tìm thấy thể loại để xóa");
 //        }
 
-        genreRepository.removeGenreById(id);
+        genreRepository.deleteById(id);
     }
 
     public List<Genre> getAllGenres() {

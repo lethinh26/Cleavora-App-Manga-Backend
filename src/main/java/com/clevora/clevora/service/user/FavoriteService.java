@@ -60,6 +60,7 @@ public class FavoriteService {
         }
     }
 
+    @Transactional(readOnly = true)
     public LikeStatusResponse getLikeStatus(String email, Integer mangaId) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("Người dùng không tồn tại"));
@@ -72,6 +73,7 @@ public class FavoriteService {
         return LikeStatusResponse.builder().liked(liked).build();
     }
 
+    @Transactional(readOnly = true)
     public FavoriteListResponse getFavorites(String email, Pageable pageable) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("Người dùng không tồn tại"));

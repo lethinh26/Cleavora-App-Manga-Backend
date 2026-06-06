@@ -1,18 +1,27 @@
 package com.clevora.clevora.controller.manga;
 
+import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.clevora.clevora.dto.common.ApiResponse;
 import com.clevora.clevora.dto.manga.MangaRequest;
 import com.clevora.clevora.dto.manga.MangaResponse;
 import com.clevora.clevora.service.manga.MangaService;
+
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @AllArgsConstructor
@@ -36,6 +45,13 @@ public class MangaController {
 
     @GetMapping("/admin/mangas/{id}")
     public ResponseEntity<ApiResponse<MangaResponse>> getMangaById(@PathVariable int id){
+        MangaResponse response = mangaService.getMangaById(id);
+        return ResponseEntity.ok(ApiResponse.success("Lấy truyện thành công", response));
+    }
+
+    // Public: lấy chi tiết truyện theo id (dùng cho Favorites/Following/History navigation)
+    @GetMapping("/mangas/by-id/{id}")
+    public ResponseEntity<ApiResponse<MangaResponse>> getPublicMangaById(@PathVariable int id){
         MangaResponse response = mangaService.getMangaById(id);
         return ResponseEntity.ok(ApiResponse.success("Lấy truyện thành công", response));
     }

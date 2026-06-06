@@ -1,11 +1,15 @@
 package com.clevora.clevora.dto.manga;
 
-import com.clevora.clevora.entity.Manga;
-import lombok.*;
-
-import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import com.clevora.clevora.entity.Manga;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @Setter
@@ -38,9 +42,11 @@ public class MangaResponse {
 
     private Integer followCount;
 
-    private LocalDateTime createdAt;
+    // Use String instead of LocalDateTime to avoid Jackson 3 serialization issues
+    // LocalDateTime -> toString() produces ISO-8601 format "2024-01-15T10:30:00"
+    private String createdAt;
 
-    private LocalDateTime updatedAt;
+    private String updatedAt;
 
     private Set<String> genres;
 
@@ -51,7 +57,6 @@ public class MangaResponse {
     // =====================================
 
     public static MangaResponse fromEntityManga(Manga manga) {
-
         return MangaResponse.builder()
                 .id(manga.getId())
                 .title(manga.getTitle())
@@ -65,24 +70,23 @@ public class MangaResponse {
                 .viewCount(manga.getViewCount())
                 .likeCount(manga.getLikeCount())
                 .followCount(manga.getFollowCount())
-                .createdAt(manga.getCreatedAt())
-                .updatedAt(manga.getUpdatedAt())
-
-                // genre names
+                // Convert LocalDateTime to ISO-8601 String directly
+                .createdAt(manga.getCreatedAt() != null
+                        ? manga.getCreatedAt().toString() : null)
+                .updatedAt(manga.getUpdatedAt() != null
+                        ? manga.getUpdatedAt().toString() : null)
                 .genres(
                         manga.getGenres()
                                 .stream()
                                 .map(genre -> genre.getName())
                                 .collect(Collectors.toSet())
                 )
-
                 // total chapters
-//                .totalChapters(
-//                        manga.getChapters() != null
-//                                ? manga.getChapters().size()
-//                                : 0
-//                )
-
+                .totalChapters(
+                        manga.getChapters() != null
+                                ? manga.getChapters().size()
+                                : 0
+                )
                 .build();
     }
 }

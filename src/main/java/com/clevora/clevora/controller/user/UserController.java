@@ -3,6 +3,7 @@ package com.clevora.clevora.controller.user;
 import com.clevora.clevora.dto.common.ApiResponse;
 import com.clevora.clevora.dto.user.*;
 import com.clevora.clevora.entity.ReadingHistory;
+import com.clevora.clevora.exception.ResourceNotFoundException;
 import com.clevora.clevora.service.manga.ReadingHistoryService;
 import com.clevora.clevora.service.user.UserService;
 import jakarta.validation.Valid;
@@ -43,7 +44,7 @@ public class UserController {
     }
 
     @PutMapping("/history") // 23
-    public ResponseEntity<ApiResponse<ReadingHistoryResponse>> updateLocationHistory(Authentication authentication, ReadingHistoryRequest request) {
+    public ResponseEntity<ApiResponse<ReadingHistoryResponse>> updateLocationHistory(Authentication authentication, @RequestBody ReadingHistoryRequest request) {
         // Lưu/cập nhật vị trí đọc (UPSERT). Nhận manga_id, chapter_id, last_page. Tự động cập nhật last_read_at.
 
         return ResponseEntity.ok(ApiResponse.success("Cập nhập thành công",
@@ -52,9 +53,13 @@ public class UserController {
     }
 
     @GetMapping("/history/{mangaId}") // 27
-    public ResponseEntity<ApiResponse<ReadingHistory>> getHistoryManga(Authentication authentication, @PathVariable Integer mangaId) {
+    public ResponseEntity<ApiResponse<ReadingHistoryResponse>> getHistoryManga(Authentication authentication, @PathVariable Integer mangaId) {
         // Lấy vị trí đọc gần nhất của 1 truyện. Dùng cho nút "Tiếp tục đọc". Trả về chapter_id + last_page.
-        return ResponseEntity.ok(ApiResponse.success("Lấy dữ liệu thành công", readingHistoryService.getReadingHistoryByManga(authentication.getName(), mangaId)));
+        ReadingHistory history = readingHistoryService.getReadingHistoryByManga(authentication.getName(), mangaId);
+        if (history == null) {
+            throw new ResourceNotFoundException("Chưa có lịch sử đọc");
+        }
+        return ResponseEntity.ok(ApiResponse.success("Lấy dữ liệu thành công", ReadingHistoryResponse.buildingFromEntity(history)));
     }
 
     @GetMapping("/history") // 24

@@ -72,6 +72,7 @@ public class FollowService {
         return FollowStatusResponse.builder().followed(followed).build();
     }
 
+    @Transactional(readOnly = true)
     public FollowListResponse getFollows(String email, Pageable pageable) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("Người dùng không tồn tại"));

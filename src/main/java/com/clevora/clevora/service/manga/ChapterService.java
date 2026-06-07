@@ -57,9 +57,9 @@ public class ChapterService {
                 .id(chapter.getId())
                 .title(chapter.getTitle())
                 .chapterNumber(chapter.getChapterNumber())
-                .viewCount(chapter.getPageCount())
+                .viewCount(chapter.getViewCount() != null ? chapter.getViewCount() : 0)
                 .createdAt(chapter.getCreatedAt())
-                .updatedAt(chapter.getCreatedAt())
+                .updatedAt(chapter.getUpdatedAt() != null ? chapter.getUpdatedAt() : chapter.getCreatedAt())
                 .images(images)
                 .build();
     }
@@ -97,28 +97,34 @@ public class ChapterService {
         Chapter chapter = chapterRepository.findById(chapterId)
                 .orElseThrow(() -> new ResourceNotFoundException("Chapter không tồn tại!"));
 
-        validateAndGetMangaForEdit(email, chapter.getManga().getId());
+        // Load manga eagerly to avoid LazyInitializationException
+        Integer mangaId = chapter.getManga().getId();
+        validateAndGetMangaForEdit(email, mangaId);
 
-        chapter.setTitle(request.getTitle());
-        chapter.setChapterNumber(request.getChapterNumber());
-        chapter.setPageCount(request.getImageUrls() != null ? request.getImageUrls().size() : chapter.getPageCount());
-        Chapter updatedChapter = chapterRepository.save(chapter);
+        if (request.getTitle() != null || request.getChapterNumber() != null) {
+            if (request.getTitle() != null) chapter.setTitle(request.getTitle());
+            if (request.getChapterNumber() != null) chapter.setChapterNumber(request.getChapterNumber());
+        }
 
         if (request.getImageUrls() != null) {
+            // Xoá ảnh cũ và thêm ảnh mới
             List<ChapterImage> oldImages = chapterImageRepository.findByChapterIdOrderByPageNumberAsc(chapterId);
             chapterImageRepository.deleteAll(oldImages);
+            chapterImageRepository.flush();
 
             int pageNumber = 1;
             for (String url : request.getImageUrls()) {
                 ChapterImage image = ChapterImage.builder()
-                        .chapter(updatedChapter)
+                        .chapter(chapter)
                         .imageUrl(url)
                         .pageNumber(pageNumber++)
                         .build();
                 chapterImageRepository.save(image);
             }
+            chapter.setPageCount(request.getImageUrls().size());
         }
 
+        Chapter updatedChapter = chapterRepository.save(chapter);
         return mapToChapterResponse(updatedChapter);
     }
 
@@ -164,9 +170,9 @@ public class ChapterService {
                 .id(chapter.getId())
                 .title(chapter.getTitle())
                 .chapterNumber(chapter.getChapterNumber())
-                .viewCount(chapter.getPageCount())
+                .viewCount(chapter.getViewCount() != null ? chapter.getViewCount() : 0)
                 .createdAt(chapter.getCreatedAt())
-                .updatedAt(chapter.getCreatedAt())
+                .updatedAt(chapter.getUpdatedAt() != null ? chapter.getUpdatedAt() : chapter.getCreatedAt())
                 .build();
     }
 }

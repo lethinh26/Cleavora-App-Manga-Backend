@@ -37,7 +37,7 @@ public class CloudinaryService {
 
         try {
             Map<String, Object> params = ObjectUtils.asMap(
-                    "folder", "clevora/" + (folder != null ? folder : "general"),
+                    "folder", "Clevora/" + (folder != null ? folder : "general"),
                     "resource_type", "image"
             );
 

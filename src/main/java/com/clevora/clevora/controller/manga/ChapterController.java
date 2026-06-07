@@ -35,7 +35,7 @@ public class ChapterController {
         return ResponseEntity.ok(ApiResponse.success("Lấy chi tiết chapter thành công", chapter));
     }
 
-    @PostMapping("/admin/mangas/{mangaId}/chapters")
+    @PostMapping("/mangas/{mangaId}/chapters")
     public ResponseEntity<ApiResponse<ChapterResponse>> createChapter(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable Integer mangaId,
@@ -44,7 +44,7 @@ public class ChapterController {
         return ResponseEntity.ok(ApiResponse.success("Thêm chapter thành công", response));
     }
 
-    @PutMapping("/admin/chapters/{chapterId}")
+    @PutMapping("/chapters/{chapterId}")
     public ResponseEntity<ApiResponse<ChapterResponse>> updateChapter(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable Integer chapterId,
@@ -53,7 +53,7 @@ public class ChapterController {
         return ResponseEntity.ok(ApiResponse.success("Cập nhật chapter thành công", response));
     }
 
-    @DeleteMapping("/admin/chapters/{chapterId}")
+    @DeleteMapping("/chapters/{chapterId}")
     public ResponseEntity<ApiResponse<String>> deleteChapter(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable Integer chapterId) {

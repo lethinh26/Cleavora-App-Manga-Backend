@@ -72,7 +72,15 @@ public class ReadingHistoryService {
         }
 
         readingHistoryRepository.save(readingHistory);
-        return ReadingHistoryResponse.buildingFromEntity(readingHistory);
+
+        // Luôn trả về chapterNumber để FE hiển thị "Tiếp tục đọc - Chương X"
+        Double chapterNumber = null;
+        if (chapterId != null) {
+            chapterNumber = chapterRepository.findById(chapterId)
+                    .map(ch -> ch.getChapterNumber())
+                    .orElse(null);
+        }
+        return ReadingHistoryResponse.buildingFromEntity(readingHistory, chapterNumber);
     }
 
     @Transactional
@@ -103,6 +111,19 @@ public class ReadingHistoryService {
                 .orElseThrow(() -> new ResourceNotFoundException("Manga not found"));
 
         return readingHistoryRepository.findByUserAndManga(user, manga).orElse(null);
+    }
+
+    /**
+     * Build ReadingHistoryResponse kèm chapterNumber để FE hiển thị "Tiếp tục đọc - Chương X"
+     */
+    public ReadingHistoryResponse buildResponseWithChapterNumber(ReadingHistory history) {
+        Double chapterNumber = null;
+        if (history.getChapterId() != null) {
+            chapterNumber = chapterRepository.findById(history.getChapterId())
+                    .map(ch -> ch.getChapterNumber())
+                    .orElse(null);
+        }
+        return ReadingHistoryResponse.buildingFromEntity(history, chapterNumber);
     }
 
 }

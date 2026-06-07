@@ -63,6 +63,11 @@ public class AdminService {
             throw new BadRequestException("Không thể vô hiệu hóa chính mình");
         }
 
+        // Không cho phép vô hiệu hóa tài khoản SUPERADMIN
+        if (targetUser.getRole() == User.Role.SUPERADMIN) {
+            throw new ForbiddenException("Không thể vô hiệu hóa tài khoản SUPERADMIN");
+        }
+
         targetUser.setActive(!targetUser.getActive());
         userRepository.save(targetUser);
 

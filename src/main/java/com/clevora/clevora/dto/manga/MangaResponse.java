@@ -52,6 +52,8 @@ public class MangaResponse {
 
     private Integer totalChapters;
 
+    private Integer submittedById;
+
     // =====================================
     // BUILDER FROM ENTITY
     // =====================================
@@ -86,6 +88,11 @@ public class MangaResponse {
                         manga.getChapters() != null
                                 ? manga.getChapters().size()
                                 : 0
+                )
+                .submittedById(
+                        manga.getSubmittedBy() != null
+                                ? manga.getSubmittedBy().getId()
+                                : null
                 )
                 .build();
     }

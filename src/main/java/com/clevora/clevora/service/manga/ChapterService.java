@@ -73,6 +73,7 @@ public class ChapterService {
                 .title(request.getTitle())
                 .chapterNumber(request.getChapterNumber())
                 .pageCount(request.getImageUrls() != null ? request.getImageUrls().size() : 0)
+                .viewCount(0)
                 .build();
 
         Chapter savedChapter = chapterRepository.save(chapter);
@@ -80,6 +81,7 @@ public class ChapterService {
         if (request.getImageUrls() != null && !request.getImageUrls().isEmpty()) {
             int pageNumber = 1;
             for (String url : request.getImageUrls()) {
+                if (url == null || url.trim().isEmpty()) continue;
                 ChapterImage image = ChapterImage.builder()
                         .chapter(savedChapter)
                         .imageUrl(url)
@@ -149,11 +151,10 @@ public class ChapterService {
         Manga manga = mangaRepository.findById(mangaId)
                 .orElseThrow(() -> new ResourceNotFoundException("Truyện không tồn tại!"));
 
-        boolean isAdmin = user.getRole() == User.Role.ADMIN || user.getRole() == User.Role.SUPERADMIN;
         boolean isOwner = manga.getSubmittedBy() != null && manga.getSubmittedBy().getId().equals(user.getId());
 
-        if (!isAdmin && !isOwner) {
-            throw new ForbiddenException("Bạn không có quyền thao tác trên truyện này!");
+        if (!isOwner) {
+            throw new ForbiddenException("Bạn không có quyền thao tác trên truyện này! Chỉ chủ sở hữu mới được phép.");
         }
 
         return manga;

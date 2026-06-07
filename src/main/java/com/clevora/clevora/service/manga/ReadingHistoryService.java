@@ -105,4 +105,11 @@ public class ReadingHistoryService {
         return readingHistoryRepository.findByUserAndManga(user, manga).orElse(null);
     }
 
+    public Double getChapterNumber(Integer chapterId) {
+        if (chapterId == null) return null;
+        return chapterRepository.findById(chapterId)
+                .map(ch -> ch.getChapterNumber())
+                .orElse(null);
+    }
+
 }

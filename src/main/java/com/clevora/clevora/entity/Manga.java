@@ -105,7 +105,7 @@ public class Manga {
     }
 
     public enum ApprovalStatus{
-        PENDING, APPROVED, REJECTED
+        PENDING, APPROVED, REJECTED, BANNED
     }
 
     @OneToMany(mappedBy = "manga", cascade = CascadeType.ALL)

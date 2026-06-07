@@ -35,14 +35,6 @@ public class MangaController {
         return ResponseEntity.ok(ApiResponse.success("Tạo mới truyện thành công", mangaResponse));
     }
 
-    @PutMapping("/admin/mangas/{id}")
-    public ResponseEntity<ApiResponse<MangaResponse>> updateManga(Authentication authentication,
-                                                                  @Valid @RequestBody MangaRequest mangaRequest,
-                                                                  @PathVariable int id){
-        MangaResponse mangaResponse = mangaService.updateManga(authentication.getName(), id ,mangaRequest);
-        return ResponseEntity.ok(ApiResponse.success("Sửa mẫu truyện thành công", mangaResponse));
-    }
-
     @GetMapping("/admin/mangas/{id}")
     public ResponseEntity<ApiResponse<MangaResponse>> getMangaById(@PathVariable int id){
         MangaResponse response = mangaService.getMangaById(id);
@@ -56,11 +48,12 @@ public class MangaController {
         return ResponseEntity.ok(ApiResponse.success("Lấy truyện thành công", response));
     }
 
-    @DeleteMapping("/admin/mangas/{id}")
-    public ResponseEntity<ApiResponse<Object>> deleteManga(Authentication authentication,
-                                                           @PathVariable int id){
+    // SUPERADMIN-only: xoá truyện bất kỳ
+    @DeleteMapping("/superadmin/mangas/{id}")
+    public ResponseEntity<ApiResponse<Object>> deleteMangaAsSuperadmin(Authentication authentication,
+                                                                       @PathVariable int id){
         mangaService.deleteManga(authentication.getName(), id);
-        return ResponseEntity.ok(ApiResponse.success("Xóa mẫu truyện thành công"));
+        return ResponseEntity.ok(ApiResponse.success("Xóa truyện thành công (SUPERADMIN)"));
     }
 
 //    8: v1/mangas: Danh sách truyện đã duyệt (APPROVED). Hỗ trợ phân trang, sắp xếp (mới nhất, lượt xem, like, follow), lọc theo trạng thái.
@@ -124,7 +117,7 @@ public class MangaController {
         return ResponseEntity.ok(ApiResponse.success("Lấy danh sách truyện thành công", response));
     }
 
-    // 30 put: /v1/me/mangas/{id}: User chỉnh sửa truyện đã đăng (chỉ khi PENDING hoặc REJECTED). Cho phép sửa title, description, cover, genres rồi re-submit.
+    // 30 put: /v1/me/mangas/{id}: User chỉnh sửa truyện đã đăng.
     @PutMapping("/me/mangas/{id}")
     public ResponseEntity<ApiResponse<MangaResponse>> updateMyManga(
             @PathVariable int id,
@@ -133,6 +126,16 @@ public class MangaController {
 
         MangaResponse response = mangaService.updateMyManga(id, request, authentication.getName());
         return ResponseEntity.ok(ApiResponse.success("Cập nhật truyện thành công", response));
+    }
+
+    // Owner: xoá truyện của mình
+    @DeleteMapping("/me/mangas/{id}")
+    public ResponseEntity<ApiResponse<Object>> deleteMyManga(
+            @PathVariable int id,
+            Authentication authentication) {
+
+        mangaService.deleteMyManga(id, authentication.getName());
+        return ResponseEntity.ok(ApiResponse.success("Xoá truyện thành công"));
     }
 
 }

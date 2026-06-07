@@ -188,6 +188,54 @@ public class AdminService {
         return MangaResponse.fromEntityManga(mangaRepository.save(manga));
     }
 
+    // ============ MANGA BAN/UNBAN ============
+
+    /**
+     * Cấm truyện — đổi approval_status sang BANNED
+     */
+    @Transactional
+    public MangaResponse banManga(String adminEmail, Integer mangaId, String reason) {
+        User admin = findUserByEmail(adminEmail);
+        validateAdminRole(admin);
+
+        Manga manga = mangaRepository.findById(mangaId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy truyện"));
+
+        if (manga.getApprovalStatus() == Manga.ApprovalStatus.BANNED) {
+            throw new BadRequestException("Truyện đã bị cấm rồi");
+        }
+
+        manga.setApprovalStatus(Manga.ApprovalStatus.BANNED);
+        manga.setRejectReason(reason);
+        manga.setApprovedBy(admin);
+        manga.setApprovedAt(LocalDateTime.now());
+
+        return MangaResponse.fromEntityManga(mangaRepository.save(manga));
+    }
+
+    /**
+     * Bỏ cấm truyện — đổi approval_status về APPROVED
+     */
+    @Transactional
+    public MangaResponse unbanManga(String adminEmail, Integer mangaId) {
+        User admin = findUserByEmail(adminEmail);
+        validateAdminRole(admin);
+
+        Manga manga = mangaRepository.findById(mangaId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy truyện"));
+
+        if (manga.getApprovalStatus() != Manga.ApprovalStatus.BANNED) {
+            throw new BadRequestException("Truyện không ở trạng thái bị cấm");
+        }
+
+        manga.setApprovalStatus(Manga.ApprovalStatus.APPROVED);
+        manga.setRejectReason(null);
+        manga.setApprovedBy(admin);
+        manga.setApprovedAt(LocalDateTime.now());
+
+        return MangaResponse.fromEntityManga(mangaRepository.save(manga));
+    }
+
     // ============ HELPERS ============
 
     private User findUserByEmail(String email) {

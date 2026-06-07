@@ -83,4 +83,23 @@ public class AdminController {
         UserResponse user = adminService.changeUserRole(authentication.getName(), id, request.getRole());
         return ResponseEntity.ok(ApiResponse.success("Thay đổi role thành công", user));
     }
+
+    // ============ MANGA BAN/UNBAN ============
+
+    @PutMapping("/v1/admin/mangas/{id}/ban")
+    public ResponseEntity<ApiResponse<MangaResponse>> banManga(
+            Authentication authentication,
+            @PathVariable Integer id,
+            @Valid @RequestBody RejectRequest request) {
+        MangaResponse manga = adminService.banManga(authentication.getName(), id, request.getRejectReason());
+        return ResponseEntity.ok(ApiResponse.success("Đã cấm truyện", manga));
+    }
+
+    @PutMapping("/v1/admin/mangas/{id}/unban")
+    public ResponseEntity<ApiResponse<MangaResponse>> unbanManga(
+            Authentication authentication,
+            @PathVariable Integer id) {
+        MangaResponse manga = adminService.unbanManga(authentication.getName(), id);
+        return ResponseEntity.ok(ApiResponse.success("Đã bỏ cấm truyện", manga));
+    }
 }

@@ -1,5 +1,6 @@
 package com.clevora.clevora.dto.manga;
 
+import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -42,8 +43,6 @@ public class MangaResponse {
 
     private Integer followCount;
 
-    // Use String instead of LocalDateTime to avoid Jackson 3 serialization issues
-    // LocalDateTime -> toString() produces ISO-8601 format "2024-01-15T10:30:00"
     private String createdAt;
 
     private String updatedAt;
@@ -51,6 +50,10 @@ public class MangaResponse {
     private Set<String> genres;
 
     private Integer totalChapters;
+
+    private String submittedByEmail;
+
+    private String submittedByName;
 
     // =====================================
     // BUILDER FROM ENTITY
@@ -75,18 +78,61 @@ public class MangaResponse {
                         ? manga.getCreatedAt().toString() : null)
                 .updatedAt(manga.getUpdatedAt() != null
                         ? manga.getUpdatedAt().toString() : null)
-                .genres(
-                        manga.getGenres()
-                                .stream()
-                                .map(genre -> genre.getName())
-                                .collect(Collectors.toSet())
-                )
-                // total chapters
-                .totalChapters(
-                        manga.getChapters() != null
-                                ? manga.getChapters().size()
-                                : 0
-                )
+                .genres(safeGetGenres(manga))
+                .totalChapters(safeGetChapterCount(manga))
+                .submittedByEmail(safeGetSubmittedByEmail(manga))
+                .submittedByName(safeGetSubmittedByName(manga))
                 .build();
     }
+
+    // =====================================
+    // SAFE LAZY-LOADING HELPERS
+    // =====================================
+
+    private static Set<String> safeGetGenres(Manga manga) {
+        try {
+            if (manga.getGenres() != null) {
+                return manga.getGenres().stream()
+                        .map(genre -> genre.getName())
+                        .collect(Collectors.toSet());
+            }
+        } catch (Exception e) {
+            // LazyInitializationException — session closed
+        }
+        return Collections.emptySet();
+    }
+
+    private static Integer safeGetChapterCount(Manga manga) {
+        try {
+            if (manga.getChapters() != null) {
+                return manga.getChapters().size();
+            }
+        } catch (Exception e) {
+            // LazyInitializationException — session closed
+        }
+        return 0;
+    }
+
+    private static String safeGetSubmittedByEmail(Manga manga) {
+        try {
+            if (manga.getSubmittedBy() != null) {
+                return manga.getSubmittedBy().getEmail();
+            }
+        } catch (Exception e) {
+            // LazyInitializationException or EntityNotFoundException
+        }
+        return null;
+    }
+
+    private static String safeGetSubmittedByName(Manga manga) {
+        try {
+            if (manga.getSubmittedBy() != null) {
+                return manga.getSubmittedBy().getDisplayName();
+            }
+        } catch (Exception e) {
+            // LazyInitializationException or EntityNotFoundException
+        }
+        return null;
+    }
 }
+

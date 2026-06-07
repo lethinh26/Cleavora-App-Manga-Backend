@@ -33,6 +33,9 @@ public class Chapter {
     @Column(name = "page_count", nullable = false)
     private Integer pageCount = 0;
 
+    @Column(name = "view_count", nullable = false)
+    private Integer viewCount = 0;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

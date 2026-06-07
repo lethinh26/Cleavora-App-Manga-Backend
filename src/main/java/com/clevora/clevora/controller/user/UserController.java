@@ -59,7 +59,9 @@ public class UserController {
         if (history == null) {
             throw new ResourceNotFoundException("Chưa có lịch sử đọc");
         }
-        return ResponseEntity.ok(ApiResponse.success("Lấy dữ liệu thành công", ReadingHistoryResponse.buildingFromEntity(history)));
+        // Lookup chapter number from chapter ID
+        Double chapterNumber = readingHistoryService.getChapterNumber(history.getChapterId());
+        return ResponseEntity.ok(ApiResponse.success("Lấy dữ liệu thành công", ReadingHistoryResponse.buildingFromEntity(history, chapterNumber)));
     }
 
     @GetMapping("/history") // 24

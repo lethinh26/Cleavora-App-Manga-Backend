@@ -33,7 +33,11 @@ public class MangaService {
     @Transactional
     public MangaResponse createManga(String email, MangaRequest mangaRequest) {
 
-        validateAdminRole(email);
+        User admin = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("Người dùng không tồn tại"));
+        if (admin.getRole() != User.Role.ADMIN && admin.getRole() != User.Role.SUPERADMIN) {
+            throw new ForbiddenException("Bạn không có quyền thực hiện hành động này");
+        }
 
         Set<Genre> genres = getGenresFromIds(mangaRequest.getGenreIds());
 
@@ -46,6 +50,7 @@ public class MangaService {
                 .artistName(mangaRequest.getArtistName())
                 .status(mangaRequest.getStatus() != null ? mangaRequest.getStatus() : Manga.MangaStatus.ONGOING)
                 .approvalStatus(Manga.ApprovalStatus.APPROVED)
+                .submittedBy(admin)
                 .genres(genres)
                 .viewCount(0)
                 .likeCount(0)
@@ -104,10 +109,31 @@ public class MangaService {
 
     @Transactional
     public boolean deleteManga(String email, Integer mangaId) {
-        validateAdminRole(email);
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("Người dùng không tồn tại"));
+        if (user.getRole() != User.Role.SUPERADMIN) {
+            throw new ForbiddenException("Chỉ SUPERADMIN mới có quyền xoá truyện");
+        }
         Manga manga = mangaRepository.findById(mangaId)
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Manga không tồn tại"));
+        mangaRepository.delete(manga);
+        return true;
+    }
+
+    @Transactional
+    public boolean deleteMyManga(Integer mangaId, String userEmail) {
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("Người dùng không tồn tại"));
+        Manga manga = mangaRepository.findById(mangaId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Manga không tồn tại"));
+
+        boolean isOwner = manga.getSubmittedBy() != null && manga.getSubmittedBy().getId().equals(user.getId());
+        if (!isOwner) {
+            throw new ForbiddenException("Bạn không có quyền xoá truyện của người khác!");
+        }
+
         mangaRepository.delete(manga);
         return true;
     }
@@ -133,6 +159,7 @@ public class MangaService {
         return genres;
     }
 
+    @Transactional(readOnly = true)
     public List<MangaResponse> getApprovedMangas(int page, int size, String sortBy, String statusStr) {
         Sort sort = switch (sortBy != null ? sortBy.toLowerCase() : "") {
             case "views" -> Sort.by(Sort.Direction.DESC, "viewCount");
@@ -152,6 +179,7 @@ public class MangaService {
                 .stream().map(MangaResponse::fromEntityManga).toList();
     }
 
+    @Transactional(readOnly = true)
     public MangaResponse getMangaDetailBySlug(String slug) {
         Manga manga = mangaRepository.findApprovedMangaBySlugWithGenres(slug)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy truyện hoặc truyện chưa được duyệt!"));
@@ -161,12 +189,14 @@ public class MangaService {
     /**
      * Admin get manga by ID (all statuses)
      */
+    @Transactional(readOnly = true)
     public MangaResponse getMangaById(Integer id) {
         Manga manga = mangaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy truyện!"));
         return MangaResponse.fromEntityManga(manga);
     }
 
+    @Transactional(readOnly = true)
     public Page<MangaResponse> searchMangas(String keyword, int page, int size) {
         if (keyword == null || keyword.trim().isEmpty()) {
             return Page.empty();
@@ -176,6 +206,7 @@ public class MangaService {
         return mangaPage.map(MangaResponse::fromEntityManga);
     }
 
+    @Transactional(readOnly = true)
     public Page<MangaResponse> getApprovedMangasByGenre(String genreSlug, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
         Page<Manga> mangaPage = mangaRepository.findApprovedMangasByGenreSlug(genreSlug, pageable);
@@ -214,6 +245,7 @@ public class MangaService {
         return MangaResponse.fromEntityManga(savedManga);
     }
 
+    @Transactional(readOnly = true)
     public Page<MangaResponse> getMyMangas(String userEmail, String approvalStatusStr, int page, int size) {
         Manga.ApprovalStatus statusEnum = null;
         if (approvalStatusStr != null && !approvalStatusStr.trim().isEmpty()) {
@@ -230,6 +262,7 @@ public class MangaService {
     /**
      * Admin: danh sách tất cả truyện (optional filter by approval_status)
      */
+    @Transactional(readOnly = true)
     public Page<MangaResponse> getAdminMangas(int page, int size, String approvalStatusStr) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
         Page<Manga> mangaPage;
@@ -253,9 +286,6 @@ public class MangaService {
 
         if (!manga.getSubmittedBy().getEmail().equals(userEmail)) {
             throw new ForbiddenException("Bạn không có quyền chỉnh sửa truyện của người khác!");
-        }
-        if (manga.getApprovalStatus() == Manga.ApprovalStatus.APPROVED) {
-            throw new ResourceNotFoundException("Truyện đã được duyệt, không thể chỉnh sửa!");
         }
 
         List<Genre> genresList = genreRepository.findAllById(request.getGenreIds());

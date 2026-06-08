@@ -41,6 +41,14 @@ public class AuthService {
     }
 
     public LoginResponse login(LoginRequest request) {
+        // Kiểm tra user có bị khoá không trước khi xác thực
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new ResourceNotFoundException("Tài khoản không tồn tại"));
+
+        if (!user.getActive()) {
+            throw new BadRequestException("Tài khoản của bạn đã bị khoá. Vui lòng liên hệ quản trị viên.");
+        }
+
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail(),
@@ -50,9 +58,6 @@ public class AuthService {
 
         String accessToken = jwtTokenProvider.generateAccessToken(authentication);
         String refreshToken = jwtTokenProvider.generateRefreshToken(request.getEmail());
-
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new ResourceNotFoundException("User không tồn tại"));
 
         return LoginResponse.builder()
                 .accessToken(accessToken)

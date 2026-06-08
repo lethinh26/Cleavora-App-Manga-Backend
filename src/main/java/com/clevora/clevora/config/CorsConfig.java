@@ -8,12 +8,6 @@ import org.springframework.web.filter.CorsFilter;
 
 import java.util.Arrays;
 
-/**
- * CORS Configuration - Cho phép frontend gọi API.
- *
- * Dev: cho phép tất cả origin.
- * Prod: nên chỉ định origin cụ thể.
- */
 @Configuration
 public class CorsConfig {
 

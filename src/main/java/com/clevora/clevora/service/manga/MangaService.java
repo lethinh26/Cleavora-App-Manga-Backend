@@ -305,7 +305,6 @@ public class MangaService {
             manga.setStatus(request.getStatus());
         }
 
-        manga.setApprovalStatus(Manga.ApprovalStatus.PENDING);
         manga.setRejectReason(null);
         Manga updatedManga = mangaRepository.save(manga);
         return MangaResponse.fromEntityManga(updatedManga);
